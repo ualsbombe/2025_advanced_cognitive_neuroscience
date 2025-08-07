@@ -47,10 +47,18 @@ class Experiment():
         
         ## staircase 
         self.n_staircase_resets = 10
-        self.n_staircase_trials = \
+
+        self.staircase_startVal   = 0.5
+        self.staircase_startValSd = 0.2
+        self.staircase_pThreshold = 0.75
+        self.staircase_gamma      = 0.01
+        self.staircase_minVal     = 0.01
+        self.staircase_maxVal     = 1
+        self.staircase_nTrials = \
             safe_divide(self.experiment_info['n_experiment_trials'],
                         self.n_staircase_resets)
-        self.staircase_intensity_values = np.arange(0, 1.01, 0.01)
+
+
         
         
         ## target stimuli
@@ -109,7 +117,7 @@ class Experiment():
             self.script_path = join('/home/lau/Nextcloud/arbejde/AU/',
                                     'cognitive_science/teaching/',
                                     '2025_advanced_cognitive_neuroscience/',
-                                    'experiment/')
+                                    'UCloud/experiment/')
         elif self.user == b'stimpc-08\n':
             self.send_triggers = True
             self.window_size = (1200, 900)
@@ -349,6 +357,10 @@ class Experiment():
             self.correct = 1
         else:
             self.correct = 0
+        self.overall_n_correct   += self.correct
+        self.staircase_n_correct += self.correct
+
+
                 
     def present_subjective_response(self):
         
@@ -389,20 +401,13 @@ class Experiment():
         
         from psychopy.data import QuestHandler
         
-        self.staircase = QuestHandler(0.5, 0.2,
-                                      pThreshold=0.75, gamma=0.01,
-                                      nTrials=self.n_staircase_trials,
-                                      minVal=0.1, maxVal=1)
-        
-        
-        ## addResponse does not work in QeuestPlus
-        # self.staircase = QuestPlusHandler(
-        #     nTrials=self.n_staircase_trials,
-        #     intensityVals=self.staircase_intensity_values,
-        #     thresholdVals=self.staircase_intensity_values,
-        #     slopeVals=3.5,
-        #     lowerAsymptoteVals=0.5,
-        #     lapseRateVals=0.02)
+        self.staircase = QuestHandler(startVal=self.staircase_startVal,
+                                      startValSd=self.staircase_startValSd,
+                                      pThreshold=self.staircase_pThreshold,
+                                      gamma=self.staircase_gamma,
+                                      nTrials=self.staircase_nTrials,
+                                      minVal=self.staircase_minVal,
+                                      maxVal=self.staircase_maxVal)
         
     def update_staircase(self):
         self.staircase.addResponse(self.correct)
@@ -460,7 +465,7 @@ class Experiment():
             string = (
             f"--------------------------------------------------------------\n"
             f"This is trial: {trial_counter+1} out of "
-            f"{self.n_staircase_trials} \nIn staircase: {staircase_counter+1}"
+            f"{self.staircase_nTrials} \nIn staircase: {staircase_counter+1}"
             f" out of {self.n_staircase_resets} \n"
             f"The contrast value of the target stimulus is: {contrast}"
                      )
@@ -470,6 +475,17 @@ class Experiment():
             else:
                 exchangable_word = 'incorrectly'
             string = 'The participant answered ' + exchangable_word
+
+        elif message_type == 'overall_accuracy':
+            n_trials_per_staircase = self.experiment_info['n_experiment_trials'] / self.n_staircase_resets
+            staircase_accuracy = (self.staircase_n_correct / (trial_counter + 1)) * 100
+
+            overall_accuracy   = self.overall_n_correct / (trial_counter + 1 + staircase_counter * n_trials_per_staircase) * 100
+            string = (
+               f"The participant has answered {round(staircase_accuracy, 1)}"
+               f" % correctly in the current staircase and {round(overall_accuracy, 1)}"
+               f" % throughout the experiment"
+                     )
             
         elif message_type == 'subjective_response?':
             
@@ -539,9 +555,13 @@ class Experiment():
             self.present_subjective_response()
     
     def run_experiment(self):
-                
+        
+        self.overall_n_correct = 0
+        
         for n_staircase_reset in range(self.n_staircase_resets):
             
+            self.staircase_n_correct = 0
+
             self.write_to_terminal('staircase_reset',
                                    staircase_counter=n_staircase_reset)
             self.define_staircase() ## reset staircase
@@ -564,6 +584,9 @@ class Experiment():
                 self.present_objective_response()
                 self.evaluate_objective_response()
                 self.write_to_terminal('correct?')
+                self.write_to_terminal('overall_accuracy',
+                                       trial_counter=n_trial,
+                                       staircase_counter=n_staircase_reset)
                 self.update_staircase()
                 self.present_subjective_response()
                 self.write_to_terminal('subjective_response?')
