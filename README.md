@@ -1,7 +1,9 @@
 # Advanced Cognitive Neuroscience; Autumn 2025
 
 This is the readme for the course Advanced Cognitive Neuroscience run at the Cognitive Science programme at Aarhus University 2025.  
+  
 All code is tested using Coder Python version **1.103.1**  
+  
 Some text and code shamelessly stolen from Laura Bock Paulsen's repository: https://github.com/laurabpaulsen/CogNeuro2025/tree/main/EEG_LAB#readme
 
 ## Overview
