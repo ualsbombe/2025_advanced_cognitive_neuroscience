@@ -48,7 +48,8 @@ Now, create your virtual environment and check that you can run Coder Python (us
 
 For maximum compatibility, make sure you have Python **3.12.3** installed (that is what Coder Python 1.103.1 is using).  
 `requirements.txt` is the same as on UCloud.  
-**Remember**, no sensitive data locally; that is, no FreeSurfer data. I recommend Power Shell on Windows.
+**Remember**, no sensitive data locally; that is, no FreeSurfer data.  
+I recommend Power Shell on Windows.
 
 Then run:
 
