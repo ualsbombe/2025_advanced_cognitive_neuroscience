@@ -47,17 +47,14 @@ Now, create your virtual environment and check that you can run Coder Python (us
 ### Local environment
 
 For maximum compatibility, make sure you have Python **3.12.3** installed (that is what Coder Python 1.103.1 is using).  
-`requirements.txt` is the same as on UCloud.  
 **Remember**, no sensitive data locally; that is, no FreeSurfer data.  
-I recommend Power Shell on Windows.
 
-Then run:
+Install miniconda https://www.anaconda.com/docs/getting-started/miniconda/install
+
+
+Run the following to make sure that you can plot 3d plots while being compatible with UCloud
 
 ```
-python3 -m venv "<your_path>/env"
-source "<your_path/env/bin/activate>  # for Windows: & "<your_path>\env\Scripts\Activate.ps1" (says ChatGPT)
-pip install --upgrade pip
-python3 -m pip install -r "<your_path/requirements.txt">
+conda create --channel=conda-forge --strict-channel-priority --name=mne_acn python=3.12 mne=1.10.0 vtk=9.3 pandas=2.3.1 scikit-learn=1.7.1 ipympl=0.9.7 nibabel=5.3.2
+conda activate mne_acn
 ```
-
-(Remember `\` instead of `/` in Power Shell)
