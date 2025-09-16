@@ -63,13 +63,13 @@ class Experiment():
         self.screen_distance = 0.60 # m
 
         ## target stimuli
-        self.stim_size = 2
+        self.stim_size = 6
         self.stim_frames_at_120_Hz = 4
         self.stimulus_list = ['stimulus_0', 'stimulus_0',
                               'stimulus_1', 'stimulus_1']
         
         ## mask
-        self.mask_size = 2
+        self.mask_size = 10
         self.mask_frames_at_120_Hz = 4
         
         ## csv
@@ -175,10 +175,10 @@ class Experiment():
         import numpy as np
         
         self.stimulus_0 = visual.GratingStim(self.window, tex='sin',
-                                             mask='gauss', sf=0.05, ori=45,
+                                             mask='gauss', sf=2, ori=45,
                                              size=self.stim_size)
         self.stimulus_1 = visual.GratingStim(self.window, tex='sin',
-                                             mask='gauss', sf=0.05, ori=135,
+                                             mask='gauss', sf=2, ori=135,
                                              size=self.stim_size)
         noise_texture = np.random.rand(128, 128) * 2 - 1
         self.mask = visual.ImageStim(self.window, image=noise_texture,
@@ -211,7 +211,9 @@ class Experiment():
             'We will now start the experimental session.\n\n'
             'It will consist of '
             f'{self.n_staircase_resets} blocks with breaks in between.\n\n'
-            "It's tough work, so make sure to use the breaks"
+            "It's tough work, so make sure to use the breaks\n\n"
+            "Reminder: there will be no text reminding you to answer on the\n"
+            "objective response."
             )
         self.text_dict['break'] = (
             'BREAK!\n\n'
@@ -329,15 +331,16 @@ class Experiment():
             self.mask.draw()
             self.window.flip()
     
-    def present_objective_response(self):
+    def present_objective_response(self, show_options):
         
         from psychopy import event, core
         from psychopy.clock import MonotonicClock
         
-        this_text = self.text_dict['response_objective']
-        self.instructions.setText(this_text)
-        self.instructions.draw()
-        self.window.flip()
+        if show_options:
+            this_text = self.text_dict['response_objective']
+            self.instructions.setText(this_text)
+            self.instructions.draw()
+            self.window.flip()
         self.objective_response = None
         clock = MonotonicClock()
         while self.objective_response is None:
@@ -366,8 +369,6 @@ class Experiment():
             self.correct = 0
         self.overall_n_correct   += self.correct
         self.staircase_n_correct += self.correct
-
-
                 
     def present_subjective_response(self):
         
@@ -557,8 +558,7 @@ class Experiment():
             self.present_fixation()
             self.present_target(contrast=self.practice_contrast)
             self.present_mask()
-            self.present_objective_response()
-            self.evaluate_objective_response()
+            self.present_objective_response(show_options=True)
             self.present_subjective_response()
     
     def run_experiment(self):
@@ -588,7 +588,7 @@ class Experiment():
                 self.present_fixation()
                 self.present_target(contrast)
                 self.present_mask()
-                self.present_objective_response()
+                self.present_objective_response(show_options=False)
                 self.evaluate_objective_response()
                 self.write_to_terminal('correct?')
                 self.write_to_terminal('overall_accuracy',
