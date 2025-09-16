@@ -444,9 +444,6 @@ class Experiment():
                         lambda: setParallelData(self.this_trigger)).start()
         self.write_to_terminal('trigger_sent')
         
-        
-        
-    
     def write_to_terminal(self, message_type, staircase_counter=None,
                           trial_counter=None, contrast=None):
         
@@ -601,11 +598,6 @@ class Experiment():
                                       n_staircase_reset=n_staircase_reset,
                                       contrast=contrast)
                 self.write_csv(self.experiment_data_filename)
-            
-            
-
-          
-
 
 #%% RUN EXPERIMENT
 
