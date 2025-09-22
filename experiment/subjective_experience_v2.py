@@ -6,6 +6,11 @@ Created on Wed Jun 25 14:58:07 2025
 @author: lau
 
 Change from v0 to v1: size in visual angle implemented instead
+Changes from v1 to v2:
+ - photo diode added
+ - auto respond added
+ - removed triggers from  practice
+ - added on-screen feedback in practice trials
 """
 
 #%% THE ONE CLASS TO RULE THEM ALL
@@ -56,13 +61,13 @@ class Experiment():
         self.fixation_max_frames_at_120_Hz = 90
         
         ## practice
-        self.practice_contrast = 0.75
+        self.practice_contrast = 0.4
         
         ## staircase 
         self.n_staircase_resets = 10
 
-        self.staircase_startVal   = 0.5
-        self.staircase_startValSd = 0.2
+        self.staircase_startVal   = 0.4
+        self.staircase_startValSd = 0.3
         self.staircase_pThreshold = 0.75
         self.staircase_gamma      = 0.01
         self.staircase_minVal     = 0.01
@@ -390,8 +395,9 @@ class Experiment():
             self.correct = 1
         else:
             self.correct = 0
-        self.overall_n_correct   += self.correct
-        self.staircase_n_correct += self.correct
+        if self.type == 'experiment':
+            self.overall_n_correct   += self.correct
+            self.staircase_n_correct += self.correct
                 
     def present_subjective_response(self):
         
@@ -426,6 +432,32 @@ class Experiment():
                  'response_PAS_' + self.subjective_response)    
         self.subjective_response_time = clock.getTime()
         self.window.flip()
+        
+    def present_feedback(self):
+        
+        if self.correct:
+            this_text = 'You answered correctly'
+        else:
+            this_text = 'You answered incorrectly'
+        self.instructions.setText(this_text)
+        self.instructions.draw()
+        self.window.flip()
+        this_response = None
+        
+        while this_response is None:
+            all_keys = event.waitKeys()
+
+            for this_key in all_keys:
+                if this_key in self.target_keys_objective:
+                    this_response = 'continue'
+                elif this_key == 'q':
+                    self.window.close()
+                    core.quit()
+                    
+                event.clearEvents('mouse')
+                        
+        self.window.flip()
+        
     
     
     def define_staircase(self):
@@ -581,7 +613,10 @@ class Experiment():
             self.present_target(contrast=self.practice_contrast)
             self.present_mask()
             self.present_objective_response(show_options=True)
+            self.evaluate_objective_response()
+            self.write_to_terminal('correct?')
             self.present_subjective_response()
+            self.present_feedback()
     
     def run_experiment(self):
     
